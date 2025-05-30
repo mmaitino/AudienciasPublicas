@@ -1,0 +1,2 @@
+eventos_9924 foi coletado em 27/05/2025. 
+Temos alguns eventos registrados depois disso, o que imagino que representem eventos previamente agendados. É importante atentar a isso ao usar os dados. A coluna situação poderia ser útil, mas podemos ver que entre as "convocadas" também existem audiências já passadas. Na análise, vou ter que pensar o que fazer com as audiências canceladas.

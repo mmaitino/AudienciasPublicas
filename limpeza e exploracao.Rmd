@@ -1,0 +1,140 @@
+---
+title: "limpeza e exploracao"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+eventos <- read_delim("eventos_9924.csv", delim = ";", escape_double = FALSE, trim_ws = TRUE)
+```
+
+```{r graf}
+eventos %>% group_by(descricaoTipo, year(dataHoraInicio)) %>% 
+  summarise(count = n()) %>% rename(year = `year(dataHoraInicio)`) %>% ungroup() %>% 
+  ggplot() + geom_line(aes(x = year, y = count, color = descricaoTipo))
+```
+
+Fica claro que alguns dos tipos de eventos foram usados apenas em determinado período
+
+```{r gr facet}
+eventos %>% group_by(descricaoTipo, year(dataHoraInicio)) %>% 
+    summarise(count = n()) %>% rename(year = `year(dataHoraInicio)`) %>% ungroup() %>% 
+    ggplot() + geom_line(aes(x = year, y = count, color = descricaoTipo)) + facet_wrap(~descricaoTipo)
+```
+
+
+## Avaliação dos tipos de evento
+
+Avaliar quais tipos de eventos vão ser incluídos e quais não.
+
+
+### Conferência e Debate
+```{r}
+eventos %>% filter(descricaoTipo == "Conferência") %>% select(descricao)
+```
+
+```{r}
+eventos %>% filter(descricaoTipo == "Debate") %>% select(descricao)
+```
+Variação no formato do texto. Alguns são estranhos (debate mais com parlamentares), mas entra
+
+### Evento Técnico
+```{r}
+eventos %>% filter(descricaoTipo == "Evento Técnico") %>% select(descricao)
+```
+Entra
+
+
+### Homenagem
+```{r}
+eventos %>% filter(descricaoTipo == "Homenagem") %>% select(descricao)
+```
+Homenagem acho que não cabe com o objeto da pesquisa. Em alguns casos, temos listas de participantes (entrega de prêmio etc)
+
+### Mesa Redonda
+```{r}
+eventos %>% filter(descricaoTipo == "Mesa Redonda") %>% select(descricao)
+```
+Incluir
+
+
+### Outro Evento
+```{r}
+eventos %>% filter(descricaoTipo == "Outro Evento") %>% select(descricao)
+```
+Muita variação no formato do texto
+
+### Painel
+```{r}
+eventos %>% filter(descricaoTipo == "Painel") %>% select(descricao)
+```
+Incluir
+
+### Palestra
+```{r}
+eventos %>% filter(descricaoTipo == "Palestra") %>% select(descricao)
+```
+Vale incluir, mas o formato do texto é diferente das audiências públicas (descrição longa sobre a pessoa e conteúdo, não lista de participantes acompanhada de cargo)
+
+### Reunião de Debate
+```{r}
+eventos %>% filter(descricaoTipo == "Reunião de Debate") %>% select(descricao)
+```
+Reunião de Debate são, em sua maioria, eventos comuns de debate do processo legislativo. Mas temos alguns que são, de fato, audiências públicas. Pode ser interessante manter, mas é preciso separar os tipos de evento entre si.
+
+### Reunião Técnica
+```{r}
+eventos %>% filter(descricaoTipo == "Reunião Técnica") %>% select(descricao)
+```
+
+Em alguns casos, são reuniões externas, em outros não. A maioria tem a lista de participantes da reunião
+
+### Seminário e Simpósio
+
+```{r}
+eventos %>% filter(descricaoTipo == "Seminário") %>% select(descricao)
+```
+
+```{r}
+eventos %>% filter(descricaoTipo == "Simpósio") %>% select(descricao)
+```
+
+A maioria tem os participantes dos eventos. 
+
+A atentar: 
+
+1) A descrição pode ser repetida em diferentes dias (quando o evento acontece em vários dias). É preciso atentar pra não repetir como se fossem novas participações
+
+2) Os simpósios e seminários podem ter deputados como oradores/palestrantes. Devem ser tratados de forma diferente na rede.
+
+
+
+### Visita oficial
+```{r}
+eventos %>% filter(descricaoTipo == "Visita Oficial") %>% select(descricao) 
+```
+
+Em alguns casos de visita oficial, temos listas da delegação que fez a visita ou descrições como "Representante do UNHCR", "Café da manhã com a ministra da igualdade racial". 
+A princípio, vou retirar do banco.
+
+### Visita técnica
+```{r}
+eventos %>% filter(descricaoTipo == "Visita Técnica") %>% select(descricao) 
+```
+
+Visita técnica corresponde, em geral, a visitas externas de comissões e deputados (às vezes é reunião virtual). Em alguns casos temos lista das pessoas com quem os deputados se encontraram, mas não serão incluídas.
+
+
+## Limpeza
+```{r excluir eventos}
+eventos_filtrado <- eventos %>% 
+  filter(!descricaoTipo %in% c("Homenagem", "Visita Oficial", "Visita Técnica"))
+```
+
+- Separar tabela com metadados dos eventos e tabela ID+Descrição
+
+- Começar a limpar descrições: ver estratégia do Vinicius
